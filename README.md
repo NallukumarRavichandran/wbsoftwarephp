@@ -1,10 +1,3 @@
-Here is the completely fixed, properly formatted **`README.md`** file. 
-
-The broken ASCII diagrams, SQL schemas, PHP/JavaScript code blocks, and badges are now correctly wrapped inside GitHub-Flavored Markdown (GFM) fenced code blocks (` ```text `, ` ```sql `, ` ```javascript `, etc.) so GitHub will render the diagrams, code, and tables cleanly.
-
----
-
-```markdown
 # ⚖️ Enterprise Weighbridge-APACS Industrial Automation & EDI Gateway System
 
 [![Platform](https://img.shields.io/badge/Platform-PHP%208.x%20%7C%20MySQL%208.x-blue.svg)](https://www.php.net/)
@@ -63,7 +56,6 @@ The **Enterprise Weighbridge-APACS System** is engineered for high-throughput in
 │                                  │ (weighbridge_db) │   │ (Cloud REST EDI)    │        │
 │                                  └──────────────────┘   └─────────────────────┘        │
 └────────────────────────────────────────────────────────────────────────────────────────┘
-```
 
 ### Key Technical Capabilities:
 * **Zero-Driver Web Serial Streaming:** Uses `navigator.serial` with continuous chunk-buffering, eliminating the need for third-party ActiveX or Java applets.
