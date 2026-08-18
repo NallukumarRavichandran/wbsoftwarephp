@@ -3,7 +3,8 @@
 [![Platform](https://img.shields.io/badge/Platform-PHP%208.x%20%7C%20MySQL%208.x-blue.svg)](https://www.php.net/)
 [![Hardware API](https://img.shields.io/badge/Hardware-HTML5%20Web%20Serial%20API%20%28RS--232%20%2F%20UART%29-green.svg)](https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API)
 [![EDI Integration](https://img.shields.io/badge/EDI%20Gateway-Chennai%20Port%20APACS%20REST%20v2.1-orange.svg)](https://apacs.chennaiport.gov.in/)
-[![Architecture](https://img.shields.io/badge/Architecture-Modular%20EAV%20%2B%20Event--Driven%20I%2FO-purple.svg)](#-system-architecture)
+[![Architecture](https://img.shields.io/badge/Architecture-Modular%20EAV%20%2B%20Event--Driven%20I%2FO-purple.svg)](#system-architecture)
+[![License](https://img.shields.io/badge/License-Proprietary%20%2F%20Enterprise-red.svg)](#)
 
 A high-performance, web-native industrial weighbridge management system and Electronic Data Interchange (EDI) gateway. This application interfaces directly with physical weighbridge terminal indicators (via RS-232/USB UART) using the browser-native **HTML5 Web Serial API**, executes dual-stage weighment state machines (Gross/Tare/Net), enforces transactional integrity via ACID-compliant relational schemas, and serializes cryptographic weighment payloads to the **Port APACS (Access Port Control System)** REST API.
 
@@ -27,7 +28,7 @@ A high-performance, web-native industrial weighbridge management system and Elec
 
 The **Enterprise Weighbridge-APACS System** is engineered for high-throughput industrial logistics hubs, freight terminals, and port-adjacent container stations. It bridges physical mechanical/strain-gauge load cells with enterprise logistics networks through non-blocking asynchronous browser interfaces.
 
-```text
+```
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
 │                                 SYSTEM BOUNDARY                                        │
 │                                                                                        │
@@ -56,21 +57,22 @@ The **Enterprise Weighbridge-APACS System** is engineered for high-throughput in
 │                                  │ (weighbridge_db) │   │ (Cloud REST EDI)    │        │
 │                                  └──────────────────┘   └─────────────────────┘        │
 └────────────────────────────────────────────────────────────────────────────────────────┘
+```
 
 ### Key Technical Capabilities:
 * **Zero-Driver Web Serial Streaming:** Uses `navigator.serial` with continuous chunk-buffering, eliminating the need for third-party ActiveX or Java applets.
 * **Dual-State Transaction Tracking:** Manages incomplete inbound/outbound logistics trips through temporary pending queues and final transactional storage.
 * **Dynamic EAV (Entity-Attribute-Value) Metadata Engine:** Allows dynamic configuration of metadata fields (e.g., Vessel Identification, Vehicle Tracking No, Cargo Classification) per enterprise profile.
-* **Autonomous Unit Normalization (TON ↔ KG):** Features a bi-directional conversion engine to ensure uniform metric reporting ($1\text{ Ton} = 1000\text{ Kg}$) across API endpoints and physical print certificates.
+* **Autonomous Unit Normalization ($TON \leftrightarrow KG$):** Features a bi-directional conversion engine to ensure uniform metric reporting ($1\text{ Ton} = 1000\text{ Kg}$) across API endpoints and physical print certificates.
 * **Asynchronous Mutation Lockout:** Built-in connection lifecycle mutex guards to prevent race conditions during port initialization.
 
 ---
 
 ## 📐 High-Level Architecture & Data Flow
 
-The application uses a hybrid architecture combining a single-page asynchronous frontend I/O loop with a hardened procedural backend transactional layer.
+The application uses a hybrid architecture combining a **single-page asynchronous frontend I/O loop** with a **hardened procedural backend transactional layer**.
 
-```text
+```
 [ Physical Weighment Platform ]
                │
                ▼
@@ -137,7 +139,7 @@ The application uses a hybrid architecture combining a single-page asynchronous 
   ```css
   grid-template-columns: 1.2fr 1.2fr 1fr 1.2fr 1.2fr 1fr;
   ```
-* **Status Column Containment:** Resolved visual bugs where the Status control dropped down to a second row, establishing consistent field alignment.
+* **Status Column Containment:** Resolved visual bugs where the `Status` control dropped down to a second row, establishing consistent field alignment.
 
 ### Phase 4: Web Serial Hardware Subsystem & Signal Framing
 * **Baud-Rate Synchronization:** Replaced legacy 2400-baud 7E1 routines with standard **9600 Baud, 8 Data Bits, No Parity, 1 Stop Bit (8N1)** serial interfaces.
@@ -146,8 +148,9 @@ The application uses a hybrid architecture combining a single-page asynchronous 
   let match = line.match(/[-+]?\d*\.?\d+/);
   let weight = parseFloat(match[0]);
   ```
-  This resolved an issue where incoming strings like `wn00007.5kg` were incorrectly truncated to `75` instead of parsing as `7.5`.
-* **Asynchronous Connection Mutex:** Implemented an `isConnecting` boolean mutex guard in `scale.js` to eliminate race condition exceptions (`InvalidStateError: A call to open() is already in progress`).
+  This resolved an issue where incoming strings like `wn00007.5kg` were incorrectly truncated to `75` instead of parsing as **`7.5`**.
+* **Asynchronous Connection Mutex:** Implemented an `isConnecting` boolean mutex guard in `scale.js` to eliminate race condition exceptions:
+  `InvalidStateError: A call to open() is already in progress.`
 
 ### Phase 5: Client-Side Form Validation & Weighment State Machine
 * **Vehicle Format Validation:** Built regular expression matching for Indian standard vehicle registration patterns (`/^[A-Z]{2}[0-9]{2}[A-Z]{2}[0-9]{4}$/`).
@@ -162,16 +165,16 @@ The application uses a hybrid architecture combining a single-page asynchronous 
 ### Phase 7: Dot-Matrix Typography & Slip Emulation
 * **Layout Design:** Replaced standard boxed HTML styling with a receipt layout modeled after industrial dot-matrix impact printers.
 * **Dynamic Field Aliasing:** Added case-insensitive regex lookups to map custom EAV attributes (`Cargo Name`, `Client Name`, `Vessel Name`, `VT No`, `Movement Type`) cleanly into the print template.
-* **Unit Normalization (TON → KG):** Added server-side conversion logic in `print_slip.php` to automatically detect TON records and scale them by $\times 1000$ for standardized KG printouts.
+* **Unit Normalization ($TON \rightarrow KG$):** Added server-side conversion logic in `print_slip.php` to automatically detect $TON$ records and scale them by $\times 1000$ for standardized $KG$ printouts.
 * **Browser Chrome Suppression:** Applied CSS paged-media directives (`@page { margin: 0; }`) with localized container margins to eliminate browser-injected URL headers and footers.
 
 ---
 
 ## 💾 Relational Schema & EAV Data Modeling
 
-The data architecture uses a 3NF relational schema combined with an Entity-Attribute-Value (EAV) model to support custom, enterprise-defined metadata fields without altering physical table structures.
+The data architecture uses a 3NF relational schema combined with an **Entity-Attribute-Value (EAV)** model to support custom, enterprise-defined metadata fields without altering physical table structures.
 
-```text
+```
 ┌─────────────────────────┐
 │        company          │
 ├─────────────────────────┤
@@ -359,7 +362,7 @@ CREATE TABLE `apacs_token` (
 
 The hardware interface uses the **W3C Web Serial API** specification, enabling bidirectional serial frame communications directly inside chromium-based secure browser contexts.
 
-```text
+```
 [ UART Physical Controller ] ──▶ [ CH340 / FTDI VCP Driver ] ──▶ [ OS Kernel Serial COM ] 
                                                                            │
                                                                            ▼
@@ -368,8 +371,8 @@ The hardware interface uses the **W3C Web Serial API** specification, enabling b
 
 ### Serial Framing Specification:
 * **Interface Standard:** EIA/TIA RS-232C via USB-to-UART bridge.
-* **Baud Rate:** 9600 symbols/sec.
-* **Data Payload Frame:** 8 Bits Data, 1 Stop Bit, No Parity (8N1).
+* **Baud Rate:** $9600 \text{ symbols/sec}$.
+* **Data Payload Frame:** $8 \text{ Bits Data}$, $1 \text{ Stop Bit}$, $\text{No Parity (8N1)}$.
 * **Flow Control:** None (Continuous autonomous push mode).
 * **Line Termination Delimiter:** Carriage Return + Line Feed (`\r\n`, `0x0D 0x0A`).
 
@@ -438,7 +441,7 @@ function processWeightLine(line) {
 
 The system formats finalized weighments into strict **JSON EDI payloads** compliant with Chennai Port Authority specifications.
 
-```text
+```
                        ┌───────────────────────────────┐
                        │ Finalized Record (sweighment) │
                        └──────────────┬────────────────┘
@@ -534,14 +537,14 @@ function dispatchToApacs($slip_no, $payloadJson) {
 
 The business logic handles both gross-first and tare-first weighment patterns:
 
-```text
+```
 [ Vehicle Entry ]
        │
        ▼
 [ Select First State: Gross (G) or Tare (T) ]
        │
        ▼
-[ Capture Platform Weight: W1 ] ──▶ Record Timestamp (D1, T1)
+[ Capture Platform Weight: $W_1$ ] ──▶ Record Timestamp ($D_1, T_1$)
        │
        ▼
 [ Commit to `weighments` Table ]
@@ -551,7 +554,7 @@ The business logic handles both gross-first and tare-first weighment patterns:
 [ Second Weighment Trigger ] ──▶ Vehicle Selected from Active Queue
        │
        ▼
-[ Capture Platform Weight: W2 ] ──▶ Record Timestamp (D2, T2)
+[ Capture Platform Weight: $W_2$ ] ──▶ Record Timestamp ($D_2, T_2$)
        │
        ▼
 [ Mathematical Engine Computes Net Weight ]
@@ -560,13 +563,13 @@ The business logic handles both gross-first and tare-first weighment patterns:
 ┌────────────────────────────────────────────────────────┐
 │               MATHEMATICAL NORMALIZATION               │
 │                                                        │
-│   W_gross = max(W1, W2)                                │
-│   W_tare  = min(W1, W2)                                │
-│   W_net   = W_gross - W_tare                           │
+│   $W_{\text{gross}} = \max(W_1, W_2)$                  │
+│   $W_{\text{tare}}  = \min(W_1, W_2)$                  │
+│   $W_{\text{net}}   = W_{\text{gross}} - W_{\text{tare}}$│
 └────────────────────────────────────────────────────────┘
        │
        ▼
-[ Verify W_net > 0 ]
+[ Verify $W_{\text{net}} > 0$ ]
        │
        ▼
 [ ACID Transaction: Commit `sweighment` & Purge `weighments` ]
@@ -576,9 +579,9 @@ The business logic handles both gross-first and tare-first weighment patterns:
 
 ## 🖨 High-Fidelity Dot-Matrix Emulation & Print Subsystem
 
-The print generator output in `print_slip.php` formats standard HTML into a structured monospace certificate slip suited for dot-matrix printers (Epson LX/LQ series, TVS MSP series) and standard laser stationery.
+The print generator output in **`print_slip.php`** formats standard HTML into a structured monospace certificate slip suited for dot-matrix printers (Epson LX/LQ series, TVS MSP series) and standard laser stationery.
 
-```text
+```
 +-------------------------------------------------------------------------+
 |                    APEX GLOBAL LOGISTICS PVT. LTD                       |
 |               100 Harbor Parkway, Port Area, Chennai-600001             |
@@ -686,7 +689,7 @@ max_execution_time = 120
 
 ## 🔎 Comprehensive Diagnostics & Fault-Tree Analysis
 
-```text
+```
                                 [ Weighbridge Issue ]
                                           │
         ┌─────────────────────────────────┼─────────────────────────────────┐
@@ -720,4 +723,3 @@ max_execution_time = 120
 
 **Enterprise Release Package**  
 *Configured for Industrial Hardware Automation & Cloud Logistics Integration*
-```
